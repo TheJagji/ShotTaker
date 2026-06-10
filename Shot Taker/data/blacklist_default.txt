@@ -1,0 +1,210 @@
+# =========================
+# WINDOWS SYSTEM PROCESSES
+# =========================
+explorer.exe
+shellhost.exe
+shellexperiencehost.exe
+startmenuexperiencehost.exe
+runtimebroker.exe
+dllhost.exe
+searchhost.exe
+applicationframehost.exe
+sihost.exe
+ctfmon.exe
+taskhostw.exe
+dwm.exe
+winlogon.exe
+csrss.exe
+svchost.exe
+services.exe
+lsass.exe
+wininit.exe
+spoolsv.exe
+conhost.exe
+cmd.exe
+powershell.exe
+regedit.exe
+msiexec.exe
+wuauclt.exe
+
+# =========================
+# WINDOWS DEBUG / RELEASE RUNTIMES
+# (Unity, Unreal, and other engine builds)
+# =========================
+windows_debug_arm64.exe
+windows_debug_arm64_console.exe
+windows_debug_x86_32.exe
+windows_debug_x86_32_console.exe
+windows_debug_x86_64.exe
+windows_debug_x86_64_console.exe
+windows_release_arm64.exe
+windows_release_arm64_console.exe
+windows_release_x86_32.exe
+windows_release_x86_32_console.exe
+windows_release_x86_64.exe
+windows_release_x86_64_console.exe
+
+# =========================
+# INSTALLERS / UNINSTALLERS
+# =========================
+setup.exe
+install.exe
+unins000.exe
+uninstall.exe
+uninst.exe
+autorun.exe
+
+# =========================
+# VISUAL C++ REDISTRIBUTABLES
+# =========================
+vc_redist.x64.exe
+vc_redist.x86.exe
+vcredist_x64.exe
+vcredist_x86.exe
+vcredist_x86_vs2005.exe
+vcredist_x64_vs2005.exe
+
+# =========================
+# .NET / DOTNET RUNTIMES
+# =========================
+dotnetfx3.exe
+dotnetfx35.exe
+dotnetfx40_full_x86_x64.exe
+dotnet.exe
+dotnethost.exe
+dotnetcli.exe
+ndp452-kb2901907-x86-x64-allos-enu.exe
+ndp472-kb4054530-x86-x64-allos-enu.exe
+ndp48-x86-x64-allos-enu.exe
+windowsdesktop-runtime-installer.exe
+
+# =========================
+# MONO / CLR RUNTIMES
+# =========================
+mono.exe
+monolinker.exe
+monop.exe
+mono-sgen.exe
+
+# =========================
+# JAVA RUNTIMES
+# =========================
+java.exe
+javaw.exe
+javaws.exe
+
+# =========================
+# PYTHON RUNTIMES
+# =========================
+python.exe
+pythonw.exe
+python3.exe
+
+# =========================
+# CRASH HANDLERS / ERROR REPORTERS
+# =========================
+crashpad_handler.exe
+errorreporter.exe
+remotecrashsender.exe
+crashreporter.exe
+crash_handler.exe
+bugsplat.exe
+bugsplatrc.exe
+unrealcefsubprocess.exe
+unrealcrashreporter.exe
+unitycrashhandler.exe
+unitycrashhandler32.exe
+unitycrashhandler64.exe
+sentry.exe
+
+# =========================
+# DEBUGGERS
+# =========================
+ja3debug.exe
+werfault.exe
+werfaultsecure.exe
+drwatson.exe
+drwtsn32.exe
+windbg.exe
+msvsmon.exe
+devenv.exe
+vsjitdebugger.exe
+x64dbg.exe
+x32dbg.exe
+ollydbg.exe
+cheatengine-x86_64.exe
+cheatengine-i386.exe
+
+# =========================
+# REGISTRY / COM TOOLS
+# =========================
+regasm.exe
+regsvcs.exe
+gacutil.exe
+regsvr32.exe
+
+# =========================
+# COMPRESSION / ARCHIVE TOOLS
+# =========================
+7za.exe
+7z.exe
+winrar.exe
+
+# =========================
+# GPU / DRIVER OVERLAYS
+# =========================
+nvcontainer.exe
+nvidia share.exe
+nvsphelper64.exe
+nvspcaps64.exe
+nvspcaps.exe
+radeonsoftware.exe
+radeoninstaller.exe
+amdrsserv.exe
+igfxem.exe
+igfxtray.exe
+
+# =========================
+# PLATFORM LAUNCHERS / HELPERS
+# (not the games themselves)
+# =========================
+steamwebhelper.exe
+steam.exe
+steamservice.exe
+gameoverlayui.exe
+gog galaxy.exe
+galaxyclient.exe
+galaxyclient helper.exe
+epicgameslauncher.exe
+epicwebhelper.exe
+eadesktop.exe
+eabackgroundservice.exe
+upc.exe
+ubisoftgamelauncher.exe
+ubisoftgamelauncher64.exe
+bethesdanetlauncher.exe
+battlenet.exe
+agent.exe
+
+# =========================
+# GOG GALAXY HELPERS
+# (GOG overlay/launcher processes, not games)
+# =========================
+cefsharp.browsersubprocess.exe
+galaxyclient.exe
+galaxyclient helper.exe
+gog galaxy notifications renderer.exe
+gog galaxy.exe
+webhelper.exe
+
+# =========================
+# COMMON GAME ENGINE HELPERS
+# (background processes, not the game)
+# =========================
+bsarchpatcher64.exe
+modorganizer.exe
+scripthookv.exe
+dsfix.exe
+skse64_loader.exe
+enb.exe
+reshade.exe

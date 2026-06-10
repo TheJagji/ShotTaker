@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShotTaker</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<!-- =========================
+     SETUP WIZARD OVERLAY
+========================= -->
+<div id="wizardOverlay" class="wizard-overlay" style="display:none;">
+<div class="wizard-box">
+
+    <div class="wizard-header">
+        <span class="logo">ShotTaker</span>
+        <p class="wizard-sub">Let's get you set up.</p>
+    </div>
+
+    <div class="wizard-progress">
+        <div class="wizard-progress-bar" id="wizardProgressBar"></div>
+    </div>
+    <div class="wizard-step-label" id="wizardStepLabel"></div>
+
+    <!-- WELCOME -->
+    <div class="wizard-step" id="wstep-welcome">
+        <h2>Welcome to ShotTaker</h2>
+        <p>ShotTaker runs in the background while you game and automatically captures screenshots — no platform overlay required. It saves directly to your chosen folder with organised filenames.</p>
+        <p>This wizard will walk you through configuring your setup. It only takes a few minutes.</p>
+        <p class="hint">💡 You can re-run this wizard any time from Settings → Screenshots.</p>
+        <p class="hint">📁 <strong>Browse</strong> buttons open a folder picker. If nothing happens, check your taskbar — it may have opened behind other windows.</p>
+    </div>
+
+    <!-- PLATFORM SELECT -->
+    <div class="wizard-step" id="wstep-platforms">
+        <h2>Which Platforms Do You Use?</h2>
+        <p>Select all your game launchers. ShotTaker uses these for game detection — not for screenshot capture.</p>
+        <div class="platform-check-list">
+            <label class="platform-check-item">
+                <input type="checkbox" id="use_steam" checked>
+                <span class="platform-label steam-label">Steam</span>
+                <span class="platform-check-desc">Steam client</span>
+            </label>
+            <label class="platform-check-item">
+                <input type="checkbox" id="use_gog">
+                <span class="platform-label gog-label">GOG</span>
+                <span class="platform-check-desc">GOG Galaxy</span>
+            </label>
+            <label class="platform-check-item">
+                <input type="checkbox" id="use_epic">
+                <span class="platform-label epic-label">Epic</span>
+                <span class="platform-check-desc">Epic Games Launcher</span>
+            </label>
+            <label class="platform-check-item">
+                <input type="checkbox" id="use_ubisoft">
+                <span class="platform-label ubisoft-label">Ubisoft</span>
+                <span class="platform-check-desc">Ubisoft Connect</span>
+            </label>
+            <label class="platform-check-item">
+                <input type="checkbox" id="use_ea">
+                <span class="platform-label ea-label">EA</span>
+                <span class="platform-check-desc">EA App</span>
+            </label>
+        </div>
+        <div class="info-box" style="margin-top:14px;">
+            📂 ShotTaker will automatically scan for your game folders when you reach the Game Folders step.
+        </div>
+    </div>
+
+    <!-- CAPTURE MODE -->
+    <div class="wizard-step" id="wstep-capturemode">
+        <h2>Screenshot Mode</h2>
+        <p>How should ShotTaker decide when to take screenshots?</p>
+        <div class="mode-options">
+            <label class="mode-option">
+                <input type="radio" name="capture_mode" value="timelapse" checked>
+                <div class="mode-option-content">
+                    <strong>⏱ Time Lapse</strong>
+                    <p>Takes a screenshot at a set interval (e.g. every 7 minutes). Predictable and low CPU usage.</p>
+                    <p class="mode-recommended">✓ Recommended for most systems</p>
+                </div>
+            </label>
+            <label class="mode-option">
+                <input type="radio" name="capture_mode" value="action">
+                <div class="mode-option-content">
+                    <strong>⚡ Action Shots</strong>
+                    <p>Monitors the screen for significant changes and captures automatically when something interesting happens.</p>
+                    <p class="warn-text">⚠️ Continuously monitors your screen — may impact performance on lower-end systems.</p>
+                </div>
+            </label>
+            <label class="mode-option">
+                <input type="radio" name="capture_mode" value="hybrid">
+                <div class="mode-option-content">
+                    <strong>🔀 Hybrid</strong>
+                    <p>Runs both Time Lapse and Action Shots simultaneously for maximum coverage.</p>
+                    <p class="warn-text">⚠️ Higher CPU usage — recommended for mid to high-end systems only.</p>
+                </div>
+            </label>
+        </div>
+    </div>
+
+    <!-- SCREENSHOT FOLDER -->
+    <div class="wizard-step" id="wstep-shotfolder">
+        <h2>Screenshot Folder</h2>
+        <p>Where should ShotTaker save your screenshots?</p>
+        <div class="wizard-field">
+            <label>Screenshots folder</label>
+            <div class="browse-row">
+                <input class="path-input" id="wiz_screenshot_folder" placeholder="e.g. C:\Screenshots\Games">
+                <button class="btn btn-secondary" onclick="browseAndFill('wiz_screenshot_folder')">📁 Browse</button>
+            </div>
+        </div>
+        <div class="wizard-field" style="margin-top:16px;">
+            <div class="settings-row">
+                <div>
+                    <label><strong>Organise by game</strong></label>
+                    <p class="hint">Creates a subfolder per game: <code>Screenshots/PathOfExile/</code></p>
+                </div>
+                <label class="toggle">
+                    <input type="checkbox" id="wiz_per_game" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+        <div class="info-box" style="margin-top:14px;">
+            <strong>File naming:</strong> Screenshots are saved as <code>GameName_TimeLapse_001.png</code> or <code>GameName_DynamicShot_001.png</code>. Numbers continue from where they left off across sessions.
+        </div>
+    </div>
+
+    <!-- INTERVAL (timelapse/hybrid only) -->
+    <div class="wizard-step" id="wstep-interval">
+        <h2>⏱ Time Lapse Settings</h2>
+        <div class="wizard-field">
+            <label>Interval between screenshots (minutes)</label>
+            <input id="wiz_interval" type="number" min="1" max="120" value="7" class="num-input">
+            <p class="hint">7 minutes is a good default for most games.</p>
+        </div>
+        <div class="wizard-field">
+            <label>First screenshot delay (seconds)</label>
+            <input id="wiz_first_delay" type="number" min="0" max="300" value="10" class="num-input">
+            <p class="hint">Wait this long after game launch before the first shot. Lets the game finish loading.</p>
+        </div>
+        <div class="wizard-field" style="margin-top:14px;">
+            <div class="settings-row">
+                <div>
+                    <label><strong>Burst mode</strong></label>
+                    <p class="hint">Take several shots in quick succession each interval instead of one.</p>
+                </div>
+                <label class="toggle">
+                    <input type="checkbox" id="wiz_burst_enabled" onchange="toggleWizBurst()">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div id="wiz_burst_options" style="display:none; margin-top:10px;">
+                <div class="burst-config-row">
+                    <div class="burst-config-field">
+                        <label>Shots per burst</label>
+                        <input id="wiz_burst_shots" type="number" min="1" max="10" value="3" class="num-input">
+                    </div>
+                    <div class="burst-config-field">
+                        <label>Delay between shots (s)</label>
+                        <input id="wiz_burst_delay" type="number" min="0.5" max="10" step="0.5" value="0.5" class="num-input">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ACTION SHOTS (action/hybrid only) -->
+    <div class="wizard-step" id="wstep-actionshots">
+        <h2>⚡ Action Shots Settings</h2>
+        <div class="warning-box">
+            <strong>⚠️ Performance note</strong>
+            <p>Action Shots continuously monitors your screen to detect changes. On lower-end systems this may affect game performance. If you notice slowdown, switch to Time Lapse mode in Settings.</p>
+        </div>
+        <div class="wizard-field" style="margin-top:16px;">
+            <label>Sensitivity (how much change triggers a shot)</label>
+            <div style="display:flex; align-items:center; gap:12px; margin-top:6px;">
+                <input type="range" id="wiz_sensitivity" min="5" max="100" value="30" step="1"
+                       oninput="document.getElementById('wiz_sens_val').textContent = this.value">
+                <output id="wiz_sens_val">30</output>
+            </div>
+            <p class="hint">Low = captures subtle changes · High = only captures large scene shifts</p>
+        </div>
+        <div class="wizard-field">
+            <label>Cooldown between action shots (seconds)</label>
+            <input id="wiz_action_cooldown" type="number" min="1" max="120" value="5" class="num-input">
+            <p class="hint">Minimum time between consecutive action shots. Prevents burst-capturing the same scene.</p>
+        </div>
+    </div>
+
+    <!-- ACHIEVEMENT SCREENSHOTS -->
+    <div class="wizard-step" id="wstep-achievements">
+        <h2>🏆 Achievement Screenshots</h2>
+        <p>ShotTaker can automatically take a burst of screenshots when Steam detects an achievement unlock — capturing the notification appearing, fully visible, and fading out.</p>
+        <div class="info-box">⚠️ Steam only for now. GOG, Epic, Ubisoft and EA support coming in a future update.</div>
+
+        <div class="wizard-field" style="margin-top:16px;">
+            <div class="settings-row">
+                <label><strong>Enable achievement screenshots</strong></label>
+                <label class="toggle">
+                    <input type="checkbox" id="wiz_achievement_enabled">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+        <div class="burst-config-row" style="margin-top:12px;">
+            <div class="burst-config-field">
+                <label>Shots per burst</label>
+                <input id="wiz_ach_shots" type="number" min="1" max="10" value="7" class="num-input">
+                <p class="hint">Default: 7</p>
+            </div>
+            <div class="burst-config-field">
+                <label>Delay between shots (s)</label>
+                <input id="wiz_ach_delay" type="number" min="0.5" max="10" step="0.5" value="0.5" class="num-input">
+                <p class="hint">Min 0.5s</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICATIONS -->
+    <div class="wizard-step" id="wstep-notifications">
+        <h2>🔔 Notifications</h2>
+        <p>ShotTaker can notify you when it detects a game starting.</p>
+        <div class="info-box" style="margin-bottom:14px;">
+            <strong>What the notification tells you:</strong> It means ShotTaker detected an executable and started capturing. If it fires when you're not in a game, blacklist that exe from the Games tab.
+        </div>
+        <div class="wizard-field">
+            <div class="mode-options">
+                <label class="mode-option">
+                    <input type="radio" name="notif_enabled" value="yes" checked>
+                    <div class="mode-option-content">
+                        <strong>Yes — notify me</strong>
+                        <p>Shows a Windows notification and plays a sound when a game is detected.</p>
+                        <p class="mode-recommended">✓ Recommended while setting up</p>
+                    </div>
+                </label>
+                <label class="mode-option">
+                    <input type="radio" name="notif_enabled" value="no">
+                    <div class="mode-option-content">
+                        <strong>No — run silently</strong>
+                    </div>
+                </label>
+            </div>
+        </div>
+        <div class="wizard-field">
+            <label>Custom notification sound</label>
+            <p class="hint">Optional. Upload an mp3, wav, ogg, or m4a file. Leave blank for the built-in sound.</p>
+            <div class="notif-sound-row">
+                <span id="wiz_sound_label" class="hint">Using built-in sound</span>
+                <label class="upload-btn">📂 Upload<input type="file" id="wiz_sound_file" accept=".mp3,.wav,.ogg,.m4a" onchange="uploadSound(this)" style="display:none;"></label>
+                <button id="wiz_sound_delete" onclick="deleteSound()" style="display:none;" class="btn btn-secondary">✕ Remove</button>
+            </div>
+            <br><button class="btn btn-secondary" onclick="testNotification()">🔔 Test Notification</button>
+            <div id="wiz_notif_permission" class="warning-box" style="display:none; margin-top:10px;">
+                <strong>⚠️ Permission required</strong>
+                <p>Click Allow when your browser asks for notification permission.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- WINDOW & STARTUP -->
+    <div class="wizard-step" id="wstep-window">
+        <h2>🖥️ Window &amp; Startup</h2>
+        <div class="wizard-field">
+            <div class="settings-row">
+                <div>
+                    <label><strong>Launch ShotTaker with Windows</strong></label>
+                    <p class="hint">Starts automatically when you log in.</p>
+                </div>
+                <label class="toggle">
+                    <input type="checkbox" id="wiz_startup" onchange="toggleWizStartup(this)">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+        <div class="wizard-field">
+            <div class="settings-row">
+                <div>
+                    <label><strong>Minimise to system tray</strong></label>
+                    <p class="hint">Closing the window sends it to the tray instead of exiting.</p>
+                </div>
+                <label class="toggle">
+                    <input type="checkbox" id="wiz_minimise_tray">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+        <div class="wizard-field">
+            <div class="settings-row">
+                <div>
+                    <label><strong>Pop up window when game detected</strong></label>
+                    <p class="hint">Briefly shows the ShotTaker window when a game starts.</p>
+                </div>
+                <label class="toggle">
+                    <input type="checkbox" id="wiz_popup_game" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- GAME FOLDERS -->
+    <div class="wizard-step" id="wstep-gamefolders">
+        <h2>📂 Game Folders</h2>
+        <p>ShotTaker is scanning for your game install folders...</p>
+        <div id="wiz_scan_status" class="info-box">🔍 Scanning...</div>
+        <div id="wiz_folder_results"></div>
+        <div class="wizard-field" style="margin-top:16px;">
+            <label>Add a folder manually</label>
+            <div class="add-folder-row">
+                <select id="wiz_add_platform" class="select" style="min-width:120px;">
+                    <option value="steam">Steam</option>
+                    <option value="gog">GOG</option>
+                    <option value="epic">Epic</option>
+                    <option value="ubisoft">Ubisoft</option>
+                    <option value="ea">EA</option>
+                    <option value="extra_games">Other</option>
+                </select>
+                <input class="path-input" id="wiz_add_path" placeholder="Folder path">
+                <button class="btn btn-secondary" onclick="wizBrowseFolder('wiz_add_path')">📁 Browse</button>
+                <button class="btn btn-primary" onclick="wizAddFolder()">Add</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- STEAM STATS FOLDER -->
+    <div class="wizard-step" id="wstep-steamstats">
+        <h2>🏆 Steam Achievement Detection</h2>
+        <p>ShotTaker watches Steam's local stats folder to detect achievement unlocks. If Steam is installed on a non-default drive, update this path.</p>
+        <div class="info-box">Default: <code>C:\Program Files (x86)\Steam\appcache\stats</code></div>
+        <div class="wizard-field" style="margin-top:14px;">
+            <label>Steam stats folder path</label>
+            <div class="browse-row">
+                <input class="path-input" id="wiz_steam_stats" placeholder="Path to Steam appcache/stats folder">
+                <button class="btn btn-secondary" onclick="browseAndFill('wiz_steam_stats')">📁 Browse</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DONE -->
+    <div class="wizard-step" id="wstep-done">
+        <h2>✅ All Done!</h2>
+        <p>Here's a summary of your setup. Anything marked <span style="color:var(--orange)">Later</span> can be configured in Settings.</p>
+        <div id="wizardSummary" class="wizard-summary"></div>
+        <p class="hint">Click <strong>Start ShotTaker</strong> to go to your dashboard.</p>
+    </div>
+
+    <!-- WIZARD NAV -->
+    <div class="wizard-nav">
+        <button id="wizBtnBack" class="btn btn-secondary" onclick="wizardBack()" style="display:none;">← Back</button>
+        <button id="wizBtnNext" class="btn btn-primary" onclick="wizardNext()">Next →</button>
+        <button id="wizBtnFinish" class="btn btn-primary" onclick="wizardFinish()" style="display:none;">Start ShotTaker ✓</button>
+    </div>
+
+</div>
+</div>
+
+
+<!-- =========================
+     MAIN APP
+========================= -->
+<div id="mainApp" style="display:none;">
+
+<!-- HEADER -->
+<header class="header" style="display:none;" id="mainHeader">
+    <div class="header-left">
+        <span class="logo">ShotTaker</span>
+        <div class="status-pill">
+            <span class="status-dot" id="statusDot"></span>
+            <span id="statusText">Loading...</span>
+        </div>
+        <span class="game-badge" id="activePlatformBadge"></span>
+    </div>
+    <div class="header-right">
+        <nav class="main-nav">
+            <button class="btn btn-ghost nav-btn active" onclick="switchTab('dashboard', this)">Dashboard</button>
+            <button class="btn btn-ghost nav-btn" onclick="switchTab('gallery', this)">Gallery</button>
+            <button class="btn btn-ghost nav-btn" onclick="switchTab('games', this)">Games</button>
+            <button class="btn btn-ghost nav-btn" onclick="switchTab('blacklist', this)">Blacklist</button>
+            <button class="btn btn-ghost nav-btn" onclick="switchTab('settings', this)">Settings</button>
+        </nav>
+    </div>
+</header>
+
+<!-- =========================
+     DASHBOARD
+========================= -->
+<div id="dashboard" class="page active">
+<div class="main">
+
+    <div class="dash-grid">
+        <div class="dash-card">
+            <div class="dash-label">Active Game</div>
+            <div class="dash-value" id="activeGame">None</div>
+        </div>
+        <div class="dash-card">
+            <div class="dash-label">Platform</div>
+            <div class="dash-value" id="activePlatform">—</div>
+        </div>
+        <div class="dash-card">
+            <div class="dash-label">Games Detected</div>
+            <div class="dash-value" id="gameCount">0</div>
+        </div>
+        <div class="dash-card">
+            <div class="dash-label">Screenshots Taken</div>
+            <div class="dash-value" id="shotCount">0</div>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <h3 class="section-title">Capture Mode</h3>
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+            <div class="mode-options" style="flex-direction:row; margin:0; gap:8px;">
+                <label class="mode-option" style="padding:8px 14px; flex-direction:row; align-items:center; gap:8px;">
+                    <input type="radio" name="dash_capture_mode" value="timelapse" onchange="saveDashCaptureMode()">
+                    <span>⏱ Time Lapse</span>
+                </label>
+                <label class="mode-option" style="padding:8px 14px; flex-direction:row; align-items:center; gap:8px;">
+                    <input type="radio" name="dash_capture_mode" value="action" onchange="saveDashCaptureMode()">
+                    <span>⚡ Action Shots</span>
+                </label>
+                <label class="mode-option" style="padding:8px 14px; flex-direction:row; align-items:center; gap:8px;">
+                    <input type="radio" name="dash_capture_mode" value="hybrid" onchange="saveDashCaptureMode()">
+                    <span>🔀 Hybrid</span>
+                </label>
+            </div>
+        </div>
+        <p class="hint" id="dashModeHint" style="margin-top:8px;"></p>
+    </div>
+
+    <div id="lastSessionCard" class="section-card" style="display:none;">
+        <h3 class="section-title">Last Session</h3>
+        <div id="lastSessionInfo"></div>
+    </div>
+
+    <div class="section-card">
+        <h3 class="section-title">Screenshot Folders</h3>
+        <div id="screenshotFolderLinks"></div>
+    </div>
+
+</div>
+</div>
+
+
+<!-- =========================
+     GALLERY
+========================= -->
+<div id="gallery" class="page">
+
+    <!-- Gallery toolbar -->
+    <div class="toolbar">
+        <div class="filters">
+            <div class="select-wrap">
+                <select id="gallery_game_filter" class="select" onchange="loadGallery()">
+                    <option value="">All Games</option>
+                </select>
+            </div>
+            <div class="select-wrap">
+                <select id="gallery_type_filter" class="select" onchange="loadGallery()">
+                    <option value="">All Types</option>
+                    <option value="TimeLapse">Time Lapse</option>
+                    <option value="DynamicShot">Action Shots</option>
+                    <option value="Achievement">Achievement</option>
+                </select>
+            </div>
+            <button class="btn btn-secondary" id="sessionFilterBtn" onclick="toggleSessionFilter()" style="font-size:12px; white-space:nowrap;">
+                🎮 Recent Session
+            </button>
+        </div>
+        <div class="toolbar-right">
+            <span class="stats" id="galleryStats"></span>
+            <button class="btn btn-secondary" onclick="lookupSteamIds()" title="Look up Steam AppID names" style="font-size:11px;">🔍 Lookup Steam IDs</button>
+            <button class="btn btn-ghost" onclick="loadGallery()" title="Refresh">⟳</button>
+        </div>
+    </div>
+
+    <div class="main">
+        <div id="galleryGrid" class="gallery"></div>
+        <div id="galleryEmpty" class="empty-state hidden">
+            <div class="empty-icon">📷</div>
+            <p>No screenshots yet.</p>
+            <p class="empty-sub">ShotTaker will capture screenshots automatically when you're in a game.</p>
+        </div>
+        <div id="galleryPagination" class="pagination"></div>
+    </div>
+
+    <!-- Lightbox -->
+    <div id="lightbox" class="lightbox hidden">
+        <div class="lb-overlay" onclick="closeLightbox()"></div>
+        <div class="lb-frame">
+            <button class="lb-close" onclick="closeLightbox()">&times;</button>
+            <button class="lb-nav lb-prev" id="lbPrev" onclick="lightboxNav(-1)">&#8249;</button>
+            <button class="lb-nav lb-next" id="lbNext" onclick="lightboxNav(1)">&#8250;</button>
+            <img id="lbImg" src="" alt="">
+            <div class="lb-meta">
+                <span id="lbGame"></span>
+                <span id="lbType"></span>
+                <span id="lbNum"></span>
+                <button class="lb-dl-btn" id="lbCopy" onclick="copyScreenshotPath()">📋 Copy Path</button>
+                <button class="btn btn-secondary" id="lbOpenWith" onclick="openInApp()">🖼 Open in Paint</button>
+                <button class="btn btn-secondary" id="lbDelete" onclick="deleteCurrentShot()" style="color:var(--red); border-color:var(--red);">🗑 Delete</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<!-- =========================
+     GAMES
+========================= -->
+<div id="games" class="page">
+<div class="main">
+
+    <div class="section-card" style="margin-bottom:14px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+            <div>
+                <strong>Scan for new games</strong>
+                <p class="hint" style="margin:2px 0 0;">Installed something new? Run a scan to pick it up.</p>
+            </div>
+            <button class="btn btn-primary" onclick="triggerGameScan()">♻️ Scan Now</button>
+        </div>
+    </div>
+
+    <div class="toolbar" style="margin-bottom:10px; border-radius:var(--radius);">
+        <input type="text" id="gamesSearch" class="search-input" placeholder="Search games..." oninput="filterGames()" style="flex:1; max-width:300px;">
+        <div class="platform-filter" id="platformFilter">
+            <button class="filter-btn active" data-platform="all" onclick="setPlatformFilter('all', this)">All</button>
+            <button class="filter-btn steam-filter" data-platform="steam" onclick="setPlatformFilter('steam', this)">Steam</button>
+            <button class="filter-btn gog-filter" data-platform="gog" onclick="setPlatformFilter('gog', this)">GOG</button>
+            <button class="filter-btn epic-filter" data-platform="epic" onclick="setPlatformFilter('epic', this)">Epic</button>
+            <button class="filter-btn ubisoft-filter" data-platform="ubisoft" onclick="setPlatformFilter('ubisoft', this)">Ubisoft</button>
+            <button class="filter-btn ea-filter" data-platform="ea" onclick="setPlatformFilter('ea', this)">EA</button>
+            <button class="filter-btn extra-filter" data-platform="extra_games" onclick="setPlatformFilter('extra_games', this)">Other</button>
+        </div>
+        <span id="gamesCount" class="stats"></span>
+    </div>
+
+    <div id="gamesList"></div>
+
+</div>
+</div>
+
+
+<!-- =========================
+     BLACKLIST
+========================= -->
+<div id="blacklist" class="page">
+<div class="main">
+    <h2 style="margin-bottom:16px;">Blacklist</h2>
+    <button class="btn btn-secondary" onclick="loadBlacklist()" style="margin-bottom:14px;">Refresh</button>
+    <div id="blacklistList"></div>
+</div>
+</div>
+
+
+<!-- =========================
+     SETTINGS
+========================= -->
+<div id="settings" class="page">
+<div class="main">
+    <h2 style="margin-bottom:16px;">Settings</h2>
+
+    <div class="settings-tabs">
+        <button class="stab active" onclick="switchSettingsTab('stab-screenshots', this)">📸 Screenshots</button>
+        <button class="stab" onclick="switchSettingsTab('stab-platforms', this)">🎮 Platforms</button>
+        <button class="stab" onclick="switchSettingsTab('stab-gallery', this)">🖼 Gallery</button>
+        <button class="stab" onclick="switchSettingsTab('stab-notifications', this)">🔔 Notifications</button>
+        <button class="stab" onclick="switchSettingsTab('stab-window', this)">🖥️ Window</button>
+        <button class="stab" onclick="switchSettingsTab('stab-feedback', this)">💬 Feedback</button>
+    </div>
+
+    <!-- SCREENSHOTS TAB -->
+    <div id="stab-screenshots" class="stab-content active">
+
+        <div class="section-card">
+            <h3 class="section-title">Capture Mode</h3>
+            <div class="mode-options">
+                <label class="mode-option">
+                    <input type="radio" name="s_capture_mode" value="timelapse" onchange="saveCaptureMode()">
+                    <div class="mode-option-content"><strong>⏱ Time Lapse</strong><p>Fixed interval screenshots.</p></div>
+                </label>
+                <label class="mode-option">
+                    <input type="radio" name="s_capture_mode" value="action" onchange="saveCaptureMode()">
+                    <div class="mode-option-content"><strong>⚡ Action Shots</strong><p>Screen change detection.</p><p class="warn-text">⚠️ Higher CPU usage.</p></div>
+                </label>
+                <label class="mode-option">
+                    <input type="radio" name="s_capture_mode" value="hybrid" onchange="saveCaptureMode()">
+                    <div class="mode-option-content"><strong>🔀 Hybrid</strong><p>Both modes simultaneously.</p><p class="warn-text">⚠️ Highest CPU usage.</p></div>
+                </label>
+            </div>
+        </div>
+
+        <div class="section-card" id="card_timelapse">
+            <h3 class="section-title">Time Lapse Settings</h3>
+            <div class="settings-row">
+                <label>Interval (minutes)</label>
+                <input id="interval" type="number" min="1" class="num-input" style="width:70px;">
+            </div>
+            <div class="settings-row" style="margin-top:8px;">
+                <label>First screenshot delay (seconds)</label>
+                <input id="first_delay" type="number" min="0" class="num-input" style="width:70px;">
+            </div>
+            <div class="settings-row" style="margin-top:14px;">
+                <div><label><strong>Burst mode</strong></label><p class="hint">Multiple shots per interval.</p></div>
+                <label class="toggle"><input type="checkbox" id="burst_enabled" onchange="toggleBurst()"><span class="toggle-slider"></span></label>
+            </div>
+            <div id="burst_options" style="display:none; margin-top:10px;">
+                <div class="burst-config-row">
+                    <div class="burst-config-field">
+                        <label>Shots per burst</label>
+                        <input id="burst_shots" type="number" min="1" max="10" value="3" class="num-input">
+                    </div>
+                    <div class="burst-config-field">
+                        <label>Delay (s)</label>
+                        <input id="burst_delay" type="number" min="0.5" max="10" step="0.5" value="0.5" class="num-input">
+                    </div>
+                </div>
+            </div>
+            <br><button class="btn btn-primary" onclick="saveSettings()">Save</button>
+        </div>
+
+        <div class="section-card" id="card_actionshots">
+            <h3 class="section-title">Action Shots Settings</h3>
+            <div class="settings-row">
+                <label>Sensitivity</label>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <input type="range" id="sensitivity" min="5" max="100" value="30" step="1"
+                           oninput="document.getElementById('sens_val').textContent = this.value">
+                    <output id="sens_val">30</output>
+                </div>
+            </div>
+            <div class="settings-row" style="margin-top:8px;">
+                <label>Cooldown between shots</label>
+                <div style="display:flex; align-items:center; gap:6px;">
+                    <input id="action_cooldown" type="number" min="1" max="999" value="5" class="num-input" style="width:70px;">
+                    <select id="action_cooldown_unit" class="select" style="width:90px;" onchange="updateCooldownMax()">
+                        <option value="seconds">Seconds</option>
+                        <option value="minutes">Minutes</option>
+                    </select>
+                </div>
+            </div>
+            <br><button class="btn btn-primary" onclick="saveActionSettings()">Save</button>
+        </div>
+
+        <div class="section-card">
+            <h3 class="section-title">🏆 Achievement Screenshots <span class="platform-label steam-label">Steam</span></h3>
+            <p class="hint">Takes a burst when a Steam achievement is unlocked. ⚠️ Steam only for now.</p>
+            <div class="settings-row" style="margin-top:10px;">
+                <label><strong>Enable</strong></label>
+                <label class="toggle"><input type="checkbox" id="achievement_enabled" onchange="saveAchievementSettings()"><span class="toggle-slider"></span></label>
+            </div>
+            <div style="margin-top:14px;">
+                <div class="burst-config-row">
+                    <div class="burst-config-field">
+                        <label>Shots per burst</label>
+                        <input id="ach_shots" type="number" min="1" max="10" value="7" class="num-input" onchange="saveAchievementSettings()">
+                    </div>
+                    <div class="burst-config-field">
+                        <label>Delay (s)</label>
+                        <input id="ach_delay" type="number" min="0.5" max="10" step="0.5" value="0.5" class="num-input" onchange="saveAchievementSettings()">
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top:14px;">
+                <button class="btn btn-secondary" onclick="fireManualBurst()">🔥 Fire Manual Burst Now</button>
+                <p class="hint">Test the burst or use for platforms without automatic detection.</p>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h3 class="section-title">Setup Wizard</h3>
+            <p class="hint">Re-run the setup wizard. Your existing settings will be pre-filled.</p>
+            <button class="btn btn-secondary" onclick="showWizard()">Re-run Setup Wizard</button>
+        </div>
+
+    </div>
+
+    <!-- PLATFORMS TAB -->
+    <div id="stab-platforms" class="stab-content">
+
+        <div class="section-card">
+            <h3 class="section-title">Game Folders</h3>
+            <p class="hint">Folders scanned for game executables.</p>
+            <div class="folder-mgmt-row">
+                <select id="add_platform" class="select">
+                    <option value="steam">Steam</option>
+                    <option value="gog">GOG</option>
+                    <option value="epic">Epic</option>
+                    <option value="ubisoft">Ubisoft</option>
+                    <option value="ea">EA</option>
+                    <option value="extra_games">Other</option>
+                </select>
+                <input class="path-input" id="add_folder_path" placeholder="Folder path">
+                <button class="btn btn-secondary" onclick="browseAndFill('add_folder_path')">📁 Browse</button>
+                <button class="btn btn-primary" onclick="addGameFolder()">Add</button>
+            </div>
+            <p class="hint">💡 Browse may open behind other windows — check your taskbar.</p>
+            <br>
+            <div id="steamFolderList"><h4>Steam</h4><span class="hint">Loading...</span></div>
+            <div id="gogFolderList"><h4>GOG</h4><span class="hint">Loading...</span></div>
+            <div id="epicFolderList"><h4>Epic</h4><span class="hint">Loading...</span></div>
+            <div id="ubisoftFolderList"><h4>Ubisoft</h4><span class="hint">Loading...</span></div>
+            <div id="eaFolderList"><h4>EA</h4><span class="hint">Loading...</span></div>
+            <div id="extraFolderList"><h4>Other</h4><span class="hint">Loading...</span></div>
+            <br>
+            <button class="btn btn-secondary" onclick="runAutoScan()">🔍 Auto-Scan</button>
+            <button class="btn btn-secondary" onclick="triggerGameScan()" style="margin-left:8px;">♻️ Rescan Games</button>
+        </div>
+
+        <div class="section-card">
+            <h3 class="section-title">Steam Achievement Stats Folder</h3>
+            <p class="hint">Required for achievement screenshot detection. Update if Steam is on a non-default drive.</p>
+            <p class="hint">Default: <code>C:\Program Files (x86)\Steam\appcache\stats</code></p>
+            <div class="browse-row">
+                <input class="path-input" id="steam_stats_folder" placeholder="Steam appcache/stats path">
+                <button class="btn btn-secondary browse-btn" onclick="browseAndFill('steam_stats_folder')">📁 Browse</button>
+            </div>
+            <br><button class="btn btn-primary" onclick="saveSteamStatsFolder()">Save</button>
+        </div>
+
+        <div class="section-card">
+            <h3 class="section-title">Steam Hotkey Backup <span class="hint">(Advanced)</span></h3>
+            <p class="hint">Optionally press the Steam screenshot hotkey alongside direct capture. Steam only — Epic and GOG are not supported.</p>
+            <div class="settings-row">
+                <label><strong>Enable Steam hotkey backup</strong></label>
+                <label class="toggle"><input type="checkbox" id="steam_hotkey_backup" onchange="saveHotkeyBackup()"><span class="toggle-slider"></span></label>
+            </div>
+            <div style="margin-top:12px;">
+                <div class="hotkey-row">
+                    <span class="platform-label steam-label">Steam</span>
+                    <input class="key-input" id="hk_steam" readonly>
+                    <button class="btn btn-secondary key-clear" onclick="clearKey('hk_steam')">Clear</button>
+                </div>
+                <br><button class="btn btn-primary" onclick="saveHotkeys()">Save Hotkey</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- GALLERY TAB -->
+    <div id="stab-gallery" class="stab-content">
+
+        <div class="section-card">
+            <h3 class="section-title">Screenshot Folder</h3>
+            <p class="hint">Where ShotTaker saves screenshots.</p>
+            <div class="browse-row">
+                <input class="path-input" id="screenshot_folder">
+                <button class="btn btn-secondary browse-btn" onclick="browseAndFill('screenshot_folder')">📁 Browse</button>
+                <button class="btn btn-secondary" onclick="openFolder(document.getElementById('screenshot_folder').value)">Open</button>
+            </div>
+            <div class="settings-row" style="margin-top:14px;">
+                <div><label><strong>Organise by game</strong></label><p class="hint">Creates subfolders per game.</p></div>
+                <label class="toggle"><input type="checkbox" id="per_game_folders"><span class="toggle-slider"></span></label>
+            </div>
+            <br><button class="btn btn-primary" onclick="saveGallerySettings()">Save</button>
+        </div>
+
+        <div class="section-card">
+            <h3 class="section-title">Open Screenshots With</h3>
+            <p class="hint">Program used when clicking "Open in..." on a screenshot. Default: Paint.</p>
+            <div class="browse-row">
+                <input class="path-input" id="open_with" placeholder="e.g. mspaint or C:\Program Files\GIMP\gimp.exe">
+                <button class="btn btn-secondary browse-btn" onclick="browseAndFill('open_with')">📁 Browse</button>
+            </div>
+            <br><button class="btn btn-primary" onclick="saveGallerySettings()">Save</button>
+        </div>
+
+        <div class="section-card">
+            <h3 class="section-title">Screenshot Folders (per platform)</h3>
+            <p class="hint">Quick-access links on the Dashboard. These are your platform's own screenshot save locations, separate from ShotTaker's direct captures.</p>
+            <div class="folder-row"><span class="platform-label steam-label">Steam</span><input class="path-input" id="sf_steam"><button class="btn btn-secondary" onclick="browseAndFill('sf_steam')">📁</button><button class="btn btn-secondary" onclick="openFolder(document.getElementById('sf_steam').value)">Open</button></div>
+            <div class="folder-row"><span class="platform-label gog-label">GOG</span><input class="path-input" id="sf_gog"><button class="btn btn-secondary" onclick="browseAndFill('sf_gog')">📁</button><button class="btn btn-secondary" onclick="openFolder(document.getElementById('sf_gog').value)">Open</button></div>
+            <div class="folder-row"><span class="platform-label epic-label">Epic</span><input class="path-input" id="sf_epic"><button class="btn btn-secondary" onclick="browseAndFill('sf_epic')">📁</button><button class="btn btn-secondary" onclick="openFolder(document.getElementById('sf_epic').value)">Open</button></div>
+            <div class="folder-row"><span class="platform-label ubisoft-label">Ubisoft</span><input class="path-input" id="sf_ubisoft"><button class="btn btn-secondary" onclick="browseAndFill('sf_ubisoft')">📁</button><button class="btn btn-secondary" onclick="openFolder(document.getElementById('sf_ubisoft').value)">Open</button></div>
+            <div class="folder-row"><span class="platform-label ea-label">EA</span><input class="path-input" id="sf_ea"><button class="btn btn-secondary" onclick="browseAndFill('sf_ea')">📁</button><button class="btn btn-secondary" onclick="openFolder(document.getElementById('sf_ea').value)">Open</button></div>
+            <br><button class="btn btn-primary" onclick="saveScreenshotFolders()">Save</button>
+        </div>
+
+    </div>
+
+    <!-- NOTIFICATIONS TAB -->
+    <div id="stab-notifications" class="stab-content">
+        <div class="section-card">
+            <h3 class="section-title">🔔 Game Detection Notifications</h3>
+            <div class="settings-row">
+                <label>Enable notifications</label>
+                <label class="toggle"><input type="checkbox" id="notif_enabled_setting" onchange="saveNotifSetting()"><span class="toggle-slider"></span></label>
+            </div>
+            <div style="margin-top:14px;">
+                <label>Custom sound</label>
+                <p class="hint">mp3, wav, ogg, m4a — or leave blank for built-in.</p>
+                <div class="notif-sound-row">
+                    <span id="sound_label" class="hint">Using built-in sound</span>
+                    <label class="upload-btn">📂 Upload<input type="file" id="sound_file" accept=".mp3,.wav,.ogg,.m4a" onchange="uploadSound(this)" style="display:none;"></label>
+                    <button id="sound_delete" onclick="deleteSound()" style="display:none;" class="btn btn-secondary">✕ Remove</button>
+                </div>
+                <br><button class="btn btn-secondary" onclick="testNotification()">🔔 Test</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- WINDOW TAB -->
+    <div id="stab-window" class="stab-content">
+        <div class="section-card">
+            <h3 class="section-title">🖥️ Window &amp; Startup</h3>
+            <div class="settings-row">
+                <div><label><strong>Launch with Windows</strong></label><p class="hint">Start automatically on login.</p></div>
+                <label class="toggle"><input type="checkbox" id="setting_startup" onchange="toggleStartup(this)"><span class="toggle-slider"></span></label>
+            </div>
+            <div class="settings-row" style="margin-top:12px;">
+                <div><label><strong>Minimise to tray</strong></label><p class="hint">Close sends to tray instead of exiting.</p></div>
+                <label class="toggle"><input type="checkbox" id="setting_minimise_tray" onchange="saveWindowSettings()"><span class="toggle-slider"></span></label>
+            </div>
+            <div class="settings-row" style="margin-top:12px;">
+                <div><label><strong>Pop up on game detection</strong></label><p class="hint">Show window briefly when game starts.</p></div>
+                <label class="toggle"><input type="checkbox" id="setting_popup_game" onchange="saveWindowSettings()"><span class="toggle-slider"></span></label>
+            </div>
+            <div id="popup_duration_row" class="settings-row" style="margin-top:12px;">
+                <div><label><strong>Pop-up duration (seconds)</strong></label></div>
+                <input type="number" id="setting_popup_duration" min="1" max="60" value="5" class="num-input" onchange="saveWindowSettings()">
+            </div>
+        </div>
+    </div>
+
+    <!-- FEEDBACK TAB -->
+    <div id="stab-feedback" class="stab-content">
+
+        <div class="section-card">
+            <h3 class="section-title">🛠️ Debug Mode</h3>
+            <p class="hint">Enables browser developer tools inside ShotTaker. Turn on before reporting a bug.</p>
+            <div class="settings-row">
+                <div><label><strong>Enable debug mode</strong></label><p class="hint">Allows F12 and right-click inspect inside the window.</p></div>
+                <label class="toggle"><input type="checkbox" id="debug_mode_toggle" onchange="saveDebugMode(this)"><span class="toggle-slider"></span></label>
+            </div>
+            <div id="debug_restart_note" class="warning-box" style="display:none; margin-top:12px;">
+                <strong>⚠️ Restart required</strong>
+                <p>Close from the tray and relaunch to apply.</p>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h3 class="section-title">🐛 Reporting a Bug?</h3>
+            <ol class="wizard-steps-list">
+                <li>Enable <strong>Debug Mode</strong> above and restart ShotTaker</li>
+                <li>Reproduce the issue</li>
+                <li>Click <strong>Copy Full Log</strong> below</li>
+                <li>Check <strong>"Include log"</strong> in the feedback form below</li>
+            </ol>
+        </div>
+
+        <div class="section-card">
+            <h3 class="section-title">Detection Log</h3>
+            <p class="hint">Live output from the detection engine. Include this with bug reports.</p>
+            <div class="log-header">
+                <button class="btn btn-secondary log-copy-btn" onclick="copyFullLog()">📋 Copy Full Log</button>
+                <button class="btn btn-secondary log-copy-btn" onclick="clearLogDisplay()">🗑 Clear</button>
+            </div>
+            <div id="detectionLog" class="log-box"></div>
+        </div>
+
+        <div class="section-card">
+            <h3 class="section-title">💬 Send Feedback</h3>
+            <p class="hint">Found a bug or have a suggestion? This opens your email client with everything pre-filled.</p>
+            <div class="info-box" style="margin-bottom:14px;">
+                <strong>📋 About the log:</strong> The detection log is <strong>never sent automatically</strong>. It's only included if you tick the box below and choose to send it.
+            </div>
+            <div class="wizard-field">
+                <label>Type</label>
+                <select id="feedback_type" class="select" style="width:100%; max-width:300px;">
+                    <option value="bug">🐛 Bug report</option>
+                    <option value="suggestion">💡 Suggestion</option>
+                    <option value="other">💬 General feedback</option>
+                </select>
+            </div>
+            <div class="wizard-field" style="margin-top:12px;">
+                <label>Your feedback</label>
+                <textarea id="feedback_body" class="feedback-textarea" placeholder="Describe the issue or suggestion..."></textarea>
+            </div>
+            <div class="wizard-field" style="margin-top:12px;">
+                <label class="done-check">
+                    <input type="checkbox" id="feedback_include_log">
+                    Include detection log in email
+                </label>
+            </div>
+            <div style="margin-top:16px;">
+                <button class="btn btn-primary" onclick="sendFeedback()">📧 Open Email Client</button>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h3 class="section-title">System Info</h3>
+            <div id="systemInfo" class="log-box" style="max-height:120px;"></div>
+        </div>
+
+    </div>
+
+</div>
+</div>
+
+</div><!-- end mainApp -->
+
+<!-- Selection toolbar -->
+<div id="selectionToolbar" class="selection-toolbar">
+    <span class="selection-count" id="selectionCount">0 selected</span>
+    <button class="btn btn-secondary" onclick="selectAllGallery()">Select All</button>
+    <button class="btn btn-secondary" onclick="deselectAllGallery()">Deselect All</button>
+    <button class="btn btn-primary" onclick="showBulkRename()">✏️ Rename</button>
+    <button class="btn btn-secondary" onclick="bulkDeleteSelected()" style="color:var(--red); border-color:var(--red);">🗑 Delete Selected</button>
+    <button class="btn btn-ghost" onclick="deselectAllGallery()" style="margin-left:auto;">✕ Cancel</button>
+</div>
+
+<!-- Bulk rename modal -->
+<div id="bulkRenameModal" class="wizard-overlay" style="display:none;">
+<div class="wizard-box" style="max-width:500px;">
+    <h2 style="margin-bottom:16px;">✏️ Rename Selected Screenshots</h2>
+    <p class="hint" style="margin-bottom:16px;">Rename <span id="renameCount">0</span> selected screenshot(s) to the ShotTaker naming convention.</p>
+
+    <div class="wizard-field">
+        <label>Game Name</label>
+        <input list="gameNameSuggestions" id="rename_game" class="path-input" placeholder="e.g. Assassins Creed Odyssey" style="width:100%;">
+        <datalist id="gameNameSuggestions"></datalist>
+        <p class="hint">Tip: Use the Steam Lookup button in the gallery to find the correct game name for numeric folders.</p>
+    </div>
+
+    <div class="wizard-field">
+        <label>Shot Type</label>
+        <select id="rename_type" class="select" style="width:100%;">
+            <option value="TimeLapse">Time Lapse</option>
+            <option value="DynamicShot">Action Shot</option>
+            <option value="Achievement">Achievement</option>
+            <option value="Imported">Imported</option>
+        </select>
+    </div>
+
+    <div class="info-box" style="margin-top:12px;">
+        Files will be renamed to: <code id="renamePreview">GameName_TimeLapse_001.png</code><br>
+        and moved to the correct folder. Original files will not be kept.
+    </div>
+
+    <div class="wizard-nav">
+        <button class="btn btn-secondary" onclick="closeBulkRename()">Cancel</button>
+        <button class="btn btn-primary" onclick="confirmBulkRename()">Rename Files</button>
+    </div>
+</div>
+</div>
+
+<!-- Toast container -->
+<div id="toasts" class="toasts"></div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

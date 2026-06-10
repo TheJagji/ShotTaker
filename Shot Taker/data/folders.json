@@ -1,0 +1,19 @@
+{
+    "steam": [
+        "D:/SteamLibrary/steamapps/common",
+        "C:/SteamLibrary/steamapps/common",
+        "M:/SteamLibrary/steamapps/common",
+        "F:/Steam/steamapps/common"
+    ],
+    "extra": [],
+    "epic": [
+        "M:/Epic Games"
+    ],
+    "gog": [
+        "F:/GOG Galaxy/Games"
+    ],
+    "ubisoft": [
+        "F:/Ubisoft Games",
+        "C:\\Program Files (x86)\\Ubisoft"
+    ]
+}

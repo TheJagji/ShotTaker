@@ -1,0 +1,6 @@
+flask
+psutil
+pyautogui
+pywebview
+pystray
+Pillow
