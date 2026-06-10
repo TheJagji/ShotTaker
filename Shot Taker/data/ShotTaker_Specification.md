@@ -3,6 +3,12 @@
 Version: 1.2
 Status: Active Development
 
+> ⚠️ **OUTDATED — historical reference only.** This v1.2 spec describes the original
+> *hotkey-pressing* design (ShotTaker pressing Steam/GOG overlay hotkeys). The app has
+> since moved to **direct screen capture** (mss) with Action Shots, achievement detection,
+> and a built-in gallery. For the current architecture see `docs/ARCHITECTURE.md`, and for
+> status/bugs/roadmap see `docs/PROJECT_STATUS.md`.
+
 ---
 
 # Overview

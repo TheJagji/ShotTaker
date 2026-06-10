@@ -1,43 +1,37 @@
+"""
+ShotTaker — blacklist management (user + shipped defaults).
+"""
+
 import os
 
-
-BLACKLIST_FILE = "data/blacklist.txt"
-BLACKLIST_DEFAULT_FILE = "data/blacklist_default.txt"
+import config
 
 
-# =========================
-# LOAD USER BLACKLIST
-# =========================
 def load_blacklist():
-    if not os.path.exists(BLACKLIST_FILE):
+    if not os.path.exists(config.BLACKLIST_FILE):
         return []
-    with open(BLACKLIST_FILE, "r") as f:
+    with open(config.BLACKLIST_FILE, "r", encoding="utf-8") as f:
         return [x.strip().lower() for x in f if x.strip()]
 
 
-# =========================
-# LOAD DEFAULT BLACKLIST
-# =========================
 def load_default_blacklist():
-    if not os.path.exists(BLACKLIST_DEFAULT_FILE):
+    if not os.path.exists(config.BLACKLIST_DEFAULT_FILE):
         return []
-    with open(BLACKLIST_DEFAULT_FILE, "r") as f:
-        return [x.strip().lower() for x in f if x.strip() and not x.strip().startswith("#")]
+    with open(config.BLACKLIST_DEFAULT_FILE, "r", encoding="utf-8") as f:
+        return [x.strip().lower() for x in f
+                if x.strip() and not x.strip().startswith("#")]
 
 
-# =========================
-# LOAD FULL BLACKLIST (user + default merged)
-# This is what scanner and detector should always use
-# =========================
 def load_full_blacklist():
-    user = set(load_blacklist())
-    default = set(load_default_blacklist())
-    return user | default
+    return set(load_blacklist()) | set(load_default_blacklist())
 
 
-# =========================
-# ADD TO BLACKLIST
-# =========================
+def _write(lines):
+    os.makedirs(config.DATA_DIR, exist_ok=True)
+    with open(config.BLACKLIST_FILE, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines))
+
+
 def add_to_blacklist(exe):
     exe = exe.lower().strip()
     if not exe:
@@ -45,34 +39,19 @@ def add_to_blacklist(exe):
     lines = load_blacklist()
     if exe not in lines:
         lines.append(exe)
-    os.makedirs("data", exist_ok=True)
-    with open(BLACKLIST_FILE, "w") as f:
-        f.write("\n".join(lines))
+        _write(lines)
 
 
-# =========================
-# REMOVE FROM BLACKLIST
-# =========================
 def remove_from_blacklist(exe):
     exe = exe.lower().strip()
-    lines = load_blacklist()
-    lines = [x for x in lines if x != exe]
-    with open(BLACKLIST_FILE, "w") as f:
-        f.write("\n".join(lines))
+    _write([x for x in load_blacklist() if x != exe])
 
 
-# =========================
-# MOVE BACK TO GAMES
-# Removes from both blacklist and disabled list
-# =========================
 def move_to_games(exe):
     exe = exe.lower().strip()
     remove_from_blacklist(exe)
-
-    disabled_path = "data/disabled_games.txt"
-    if os.path.exists(disabled_path):
-        with open(disabled_path, "r") as f:
+    if os.path.exists(config.DISABLED_FILE):
+        with open(config.DISABLED_FILE, "r", encoding="utf-8") as f:
             lines = [x.strip() for x in f if x.strip()]
-        lines = [x for x in lines if x != exe]
-        with open(disabled_path, "w") as f:
-            f.write("\n".join(lines))
+        with open(config.DISABLED_FILE, "w", encoding="utf-8") as f:
+            f.write("\n".join(x for x in lines if x != exe))

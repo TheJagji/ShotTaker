@@ -1,0 +1,35 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# ---- Build / packaging output ----
+build/
+dist/
+*.spec.bak
+
+# ---- Runtime state (regenerated on launch) ----
+status/
+commands/*.flag
+launch_error.log
+*.tmp
+
+# ---- User / machine-specific data (not for version control) ----
+data/settings.json
+data/shot_counters.json
+data/library.json
+data/profiles.json
+data/game_names.json
+
+# ---- Captured content & exports ----
+Screenshots/
+Exports/
+static/sounds/
+
+# ---- Editor / OS noise ----
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
