@@ -1,6 +1,12 @@
+# ShotTaker runtime dependencies
 flask
 psutil
 pyautogui
 pywebview
 pystray
 Pillow
+mss
+numpy
+
+# Packaging (build the .exe)
+pyinstaller

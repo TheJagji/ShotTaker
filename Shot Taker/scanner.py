@@ -1,142 +1,114 @@
-import os
-import json
+"""
+ShotTaker — game folder scanner.
 
-# Module-level game dict: { "exe.exe": "platform" }
+Walks configured folders for .exe files and builds a platform-tagged dict
+{ "exe.exe": "platform" } stored in GAME_LIST and status/games.json.
+"""
+
+import os
+
+import config
+
 GAME_LIST = {}
 
+# Scan order — first platform to claim an exe wins.
+PLATFORM_KEYS = [
+    "steam", "gog", "epic", "ubisoft", "ea",
+    "xbox", "battlenet", "riot", "rockstar", "itch", "extra",
+]
 
-# =========================
-# LOAD FOLDERS
-# =========================
+JUNK_DIRS = {
+    "__pycache__", "node_modules", ".git", "logs", "cache",
+    "shadercache", "htmlcache", "webcache", "_commonredist", "directx",
+}
+
+SKIP_PATTERNS = [
+    "install", "setup", "unins", "update", "updater",
+    "crashpad", "crashreport", "crash_handler", "crashhandler",
+    "redist", "vcredist", "directx", "dotnet", "prereq", "prerequisite",
+    "launcher", "helper", "service", "uninstall", "touchup", "cleanup",
+]
+
+
 def load_folders():
-    try:
-        with open("data/folders.json", "r") as f:
-            return json.load(f)
-    except:
-        return {
-            "steam": [], "gog": [], "epic": [],
-            "ubisoft": [], "ea": [], "extra_games": []
-        }
+    return config.read_json(config.FOLDERS_FILE, None) or {k: [] for k in PLATFORM_KEYS}
 
 
-# =========================
-# LOAD DISABLED GAMES
-# =========================
 def load_disabled():
     try:
-        with open("data/disabled_games.txt", "r") as f:
+        with open(config.DISABLED_FILE, "r", encoding="utf-8") as f:
             return {x.strip().lower() for x in f if x.strip()}
-    except:
+    except OSError:
         return set()
 
 
-# =========================
-# SCAN SINGLE FOLDER
-# =========================
-def scan_folder(path, platform, blacklist, disabled):
+def scan_folder(path, platform, blacklist, disabled, hints):
     games = {}
-
     if not os.path.exists(path):
         print(f"  [SCAN] Folder not found, skipping: {path}")
         return games
-
     print(f"  [SCAN] Scanning: {path}")
     count = 0
-
     for root, dirs, files in os.walk(path):
-        # Skip common junk subdirectories to speed up scan
-        dirs[:] = [d for d in dirs if d.lower() not in (
-            "__pycache__", "node_modules", ".git", "logs", "cache",
-            "shadercache", "htmlcache", "webcache"
-        )]
-
+        dirs[:] = [d for d in dirs if d.lower() not in JUNK_DIRS]
         for f in files:
-            if not f.endswith(".exe"):
+            if not f.lower().endswith(".exe"):
                 continue
-
             exe = f.lower().strip()
-
-            if exe in blacklist:
+            if exe in blacklist or exe in disabled:
                 continue
-
-            if exe in disabled:
+            if any(x in exe for x in SKIP_PATTERNS):
                 continue
-
-            # Skip installers, updaters, launchers, crash handlers
-            skip_patterns = [
-                "install", "setup", "unins", "update", "updater",
-                "crashpad", "crashreport", "crash_handler",
-                "redist", "vcredist", "directx",
-                "dotnet", "prereq", "prerequisite",
-                "launcher" # most game launchers aren't the game itself
-            ]
-            if any(x in exe for x in skip_patterns):
-                continue
-
             if exe not in games:
                 games[exe] = platform
                 count += 1
-
+                # Title hint: top-level folder under the scanned root (usually the game name)
+                try:
+                    rel = os.path.relpath(root, path)
+                    top = rel.split(os.sep)[0]
+                    if top and top != "." and exe not in hints:
+                        hints[exe] = top
+                except ValueError:
+                    pass
     print(f"  [SCAN] Found {count} executables in {path}")
     return games
 
 
-# =========================
-# MAIN SCAN
-# =========================
 def scan_games(blacklist=None):
     global GAME_LIST
-
     from blacklist import load_full_blacklist
 
     if blacklist is None:
         blacklist = load_full_blacklist()
-
     blacklist = set(blacklist)
     folders = load_folders()
     disabled = load_disabled()
 
     found = {}
-    platform_keys = ["steam", "gog", "epic", "ubisoft", "ea", "extra_games"]
-
-    print("[SCAN] Starting game scan...")
-
-    for platform in platform_keys:
+    hints = {}
+    print("[SCAN] Sweeping the drives for games...")
+    for platform in PLATFORM_KEYS:
         paths = folders.get(platform, [])
         if not paths:
             continue
         print(f"[SCAN] Platform: {platform} ({len(paths)} folder(s))")
         for path in paths:
-            result = scan_folder(path, platform, blacklist, disabled)
-            for exe, plat in result.items():
-                if exe not in found:
-                    found[exe] = plat
+            for exe, plat in scan_folder(path, platform, blacklist, disabled, hints).items():
+                found.setdefault(exe, plat)
 
     GAME_LIST = found
-    print(f"[SCAN] Complete — {len(GAME_LIST)} games found")
+    print(f"[SCAN] Roster locked — {len(GAME_LIST)} games found.")
+    config.write_json(config.GAMES_FILE, GAME_LIST)
 
-    # Save game list
-    os.makedirs("status", exist_ok=True)
-    with open("status/games.json", "w") as f:
-        json.dump(GAME_LIST, f, indent=4)
-
-    # Update stats
-    stats = {
-        "screenshots_taken": 0,
-        "scan_count": 1,
-        "active_game": "",
-        "uptime": 0
-    }
     try:
-        with open("status/stats.json", "r") as f:
-            old = json.load(f)
-            stats["scan_count"] = old.get("scan_count", 0) + 1
-            stats["screenshots_taken"] = old.get("screenshots_taken", 0)
-            stats["active_game"] = old.get("active_game", "")
-    except:
-        pass
+        import gamenames
+        gamenames.update_hints(hints)
+    except Exception as e:
+        print(f"[SCAN] Name-hint update failed: {e}")
 
-    with open("status/stats.json", "w") as f:
-        json.dump(stats, f, indent=4)
-
+    stats = config.read_json(config.STATS_FILE, {}) or {}
+    stats["scan_count"] = stats.get("scan_count", 0) + 1
+    stats["games_found"] = len(GAME_LIST)
+    stats.setdefault("screenshots_taken", 0)
+    config.write_json(config.STATS_FILE, stats)
     return GAME_LIST

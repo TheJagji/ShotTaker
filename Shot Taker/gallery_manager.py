@@ -1,46 +1,41 @@
+"""
+ShotTaker — gallery indexing, search, thumbnails, and bulk rename.
+
+Lists screenshots from the configured folder, merges in library metadata
+(favorite / tags / rating), supports filter+search+sort, and renames imported
+files into the ShotTaker convention.
+"""
+
 import os
-import json
 import shutil
 from pathlib import Path
+
+import config
+import library
 
 try:
     from PIL import Image
     PIL_AVAILABLE = True
-except ImportError:
+except Exception:
     PIL_AVAILABLE = False
 
-
-# =========================
-# LOAD SETTINGS
-# =========================
-def load_settings():
-    try:
-        with open("data/settings.json", "r") as f:
-            return json.load(f)
-    except:
-        return {}
+EXTS = {".png", ".jpg", ".jpeg", ".webp"}
+SHOT_TYPES = ["TimeLapse", "DynamicShot", "Achievement", "Manual", "Imported"]
 
 
-# =========================
-# GET SCREENSHOT FOLDER
-# =========================
 def get_screenshot_folder():
-    return load_settings().get("screenshot_folder", "screenshots")
+    return config.get_screenshot_folder()
 
 
-# =========================
-# SANITISE GAME NAME
-# Only strips Windows-illegal filename chars, keeps spaces (Steam convention)
-# =========================
 def sanitise_game_name(name):
     clean = name
     for ch in '<>:"/\\|?*':
-        clean = clean.replace(ch, '_')
+        clean = clean.replace(ch, "_")
     return clean.strip() or "Unknown"
 
 
 # =========================
-# THUMB PATH FOR SCREENSHOT
+# THUMBNAILS
 # =========================
 def thumb_path_for(screenshot_path):
     base = Path(get_screenshot_folder())
@@ -48,22 +43,16 @@ def thumb_path_for(screenshot_path):
     try:
         rel = Path(screenshot_path).relative_to(base)
         return str(thumb_dir / rel.with_suffix(".jpg"))
-    except:
-        name = Path(screenshot_path).stem
-        return str(thumb_dir / (name + ".jpg"))
+    except ValueError:
+        return str(thumb_dir / (Path(screenshot_path).stem + ".jpg"))
 
 
-# =========================
-# ENSURE THUMBNAIL EXISTS
-# =========================
 def ensure_thumbnail(screenshot_path):
     if not PIL_AVAILABLE:
         return None
-
     thumb = thumb_path_for(screenshot_path)
     if os.path.exists(thumb):
         return thumb
-
     try:
         Path(thumb).parent.mkdir(parents=True, exist_ok=True)
         img = Image.open(screenshot_path)
@@ -78,222 +67,161 @@ def ensure_thumbnail(screenshot_path):
 
 
 # =========================
-# PARSE SCREENSHOT FILE
-# Handles both our naming convention and imported files
+# PARSE
 # =========================
 def parse_screenshot(f, base):
-    """
-    Returns a dict describing a screenshot file.
-    Handles:
-    - Our convention: GameName_TimeLapse_001.png
-    - Files in subfolders: folder name = game name
-    - Files in root: game = "Unknown"
-    - Any .png/.jpg/.jpeg file
-    """
     name = f.stem
-    parts = f.parts
-
-    # Determine game name from folder structure first
     try:
-        rel = f.relative_to(base)
-        rel_parts = rel.parts
-        # File is in a subfolder — folder name is the game
-        if len(rel_parts) > 1:
-            folder_game = rel_parts[0]
-        else:
-            folder_game = None
-    except:
+        rel_parts = f.relative_to(base).parts
+        folder_game = rel_parts[0] if len(rel_parts) > 1 else None
+    except ValueError:
         folder_game = None
 
-    shot_type = None
-    game_name = None
-    shot_num  = 0
-
-    # Try to parse our naming convention
-    for shot_t in ["DynamicShot", "TimeLapse", "Achievement", "Imported"]:
-        if f"_{shot_t}_" in name:
-            idx = name.rfind(f"_{shot_t}_")
-            parsed_game = name[:idx]
-            rest = name[idx + 1:]
-            type_and_num = rest.split("_", 1)
-            shot_type = type_and_num[0]
+    shot_type, game_name, shot_num = None, None, 0
+    for st in SHOT_TYPES:
+        if f"_{st}_" in name:
+            idx = name.rfind(f"_{st}_")
+            game_name = name[:idx]
+            rest = name[idx + 1:].split("_", 1)
+            shot_type = rest[0]
             try:
-                shot_num = int(type_and_num[1]) if len(type_and_num) > 1 else 0
-            except:
+                shot_num = int(rest[1]) if len(rest) > 1 else 0
+            except ValueError:
                 shot_num = 0
-            game_name = parsed_game
             break
-
-    # If not our convention
     if not game_name:
-        # Use folder name as game if available, otherwise Unknown
-        game_name = folder_game if folder_game else "Unknown"
+        game_name = folder_game or "Unknown"
         shot_type = "Imported"
-        shot_num  = 0
 
     try:
         mtime = f.stat().st_mtime
-    except:
-        mtime = 0
+        size = f.stat().st_size
+    except OSError:
+        mtime = size = 0
 
+    meta = library.get(str(f))
     return {
-        "path":     str(f),
-        "game":     game_name,
-        "type":     shot_type,
-        "num":      shot_num,
+        "path": str(f),
+        "game": game_name,
+        "type": shot_type,
+        "num": shot_num,
         "filename": f.name,
-        "mtime":    mtime,
-        "ext":      f.suffix.lower(),
+        "mtime": mtime,
+        "size": size,
+        "ext": f.suffix.lower(),
+        "favorite": meta.get("favorite", False),
+        "tags": meta.get("tags", []),
+        "rating": meta.get("rating", 0),
+        "reason": meta.get("reason", ""),
     }
 
 
 # =========================
-# LIST ALL SCREENSHOTS
-# Picks up PNG, JPG, JPEG — both our convention and imported files
+# LIST + SEARCH + SORT
 # =========================
-def list_screenshots(game_filter=None, type_filter=None):
+def list_screenshots(game_filter=None, type_filter=None, favorites_only=False,
+                     tag=None, search=None, sort="newest"):
     base = Path(get_screenshot_folder())
     if not base.exists():
         return []
 
     results = []
-    extensions = {".png", ".jpg", ".jpeg"}
-
+    search_l = (search or "").lower().strip()
     for f in base.rglob("*"):
-        if not f.is_file():
+        if not f.is_file() or f.suffix.lower() not in EXTS or ".thumbs" in f.parts:
             continue
-        if f.suffix.lower() not in extensions:
-            continue
-        # Skip thumbnails folder
-        if ".thumbs" in f.parts:
-            continue
-
         item = parse_screenshot(f, base)
-
         if game_filter and game_filter != item["game"]:
             continue
         if type_filter and type_filter != item["type"]:
             continue
-
+        if favorites_only and not item["favorite"]:
+            continue
+        if tag and tag not in item["tags"]:
+            continue
+        if search_l and search_l not in item["filename"].lower() and search_l not in item["game"].lower() \
+                and not any(search_l in t.lower() for t in item["tags"]):
+            continue
         results.append(item)
 
-    results.sort(key=lambda x: x["mtime"], reverse=True)
+    reverse = sort != "oldest"
+    if sort in ("largest", "smallest"):
+        results.sort(key=lambda x: x["size"], reverse=(sort == "largest"))
+    elif sort == "rating":
+        results.sort(key=lambda x: (x["rating"], x["mtime"]), reverse=True)
+    else:
+        results.sort(key=lambda x: x["mtime"], reverse=reverse)
     return results
 
 
-# =========================
-# LIST GAME NAMES
-# Includes both parsed names and folder names
-# =========================
 def list_games():
     base = Path(get_screenshot_folder())
     games = set()
-
     if base.exists():
-        # Add folder names as game names
         for item in base.iterdir():
             if item.is_dir() and item.name != ".thumbs":
                 games.add(item.name)
-
-        # Also add parsed game names from files
         for item in list_screenshots():
             if item["game"] and item["game"] != "Unknown":
                 games.add(item["game"])
-
     return sorted(games)
 
 
-# =========================
-# LIST SHOT TYPES
-# =========================
 def list_types():
-    return ["TimeLapse", "DynamicShot", "Achievement", "Imported"]
+    return SHOT_TYPES
 
 
 # =========================
 # BULK RENAME
-# Renames a list of files to our convention with a new game name and type.
-# Moves files to correct subfolder if per_game_folders is enabled.
-# Returns list of {old_path, new_path, success, error}
 # =========================
 def bulk_rename(file_paths, game_name, shot_type, settings):
     from capture_manager import next_counter
 
     game_name = sanitise_game_name(game_name)
-    base      = Path(settings.get("screenshot_folder", "screenshots"))
-    per_game  = settings.get("per_game_folders", True)
-
+    base = Path(config.get_screenshot_folder(settings))
+    per_game = settings.get("per_game_folders", True)
     results = []
 
-    for old_path_str in file_paths:
-        old_path = Path(os.path.normpath(old_path_str))
-
-        if not old_path.exists():
-            results.append({"old_path": old_path_str, "success": False, "error": f"File not found: {old_path}"})
+    for old_str in file_paths:
+        old = Path(os.path.normpath(old_str))
+        if not old.exists():
+            results.append({"old_path": old_str, "success": False, "error": "File not found"})
             continue
-
         try:
-            # Keep original extension
-            orig_ext = old_path.suffix.lower()
-            ext = orig_ext if orig_ext in (".png", ".jpg", ".jpeg") else ".png"
-
-            n        = next_counter(game_name, shot_type)
-            new_name = f"{game_name}_{shot_type}_{n:03d}{ext}"
-
-            if per_game:
-                new_dir = base / game_name
-            else:
-                new_dir = base
-
+            ext = old.suffix.lower() if old.suffix.lower() in EXTS else ".png"
+            n = next_counter(game_name, shot_type)
+            new_dir = base / game_name if per_game else base
             new_dir.mkdir(parents=True, exist_ok=True)
-            new_path = new_dir / new_name
+            new_path = new_dir / f"{game_name}_{shot_type}_{n:03d}{ext}"
 
-            # Move the file
-            shutil.move(str(old_path), str(new_path))
+            shutil.move(str(old), str(new_path))
+            library.on_rename(str(old), str(new_path))
 
-            # Move thumbnail if it exists
-            try:
-                old_thumb = Path(thumb_path_for(str(old_path)))
-                if old_thumb.exists():
-                    new_thumb = Path(thumb_path_for(str(new_path)))
-                    new_thumb.parent.mkdir(parents=True, exist_ok=True)
-                    shutil.move(str(old_thumb), str(new_thumb))
-            except:
-                pass
+            old_thumb = Path(thumb_path_for(str(old)))
+            if old_thumb.exists():
+                new_thumb = Path(thumb_path_for(str(new_path)))
+                new_thumb.parent.mkdir(parents=True, exist_ok=True)
+                shutil.move(str(old_thumb), str(new_thumb))
 
-            # Remove old empty folder
-            try:
-                if per_game and old_path.parent != new_dir and old_path.parent != base:
-                    if not any(old_path.parent.iterdir()):
-                        old_path.parent.rmdir()
-            except:
-                pass
+            if per_game and old.parent != new_dir and old.parent != base:
+                try:
+                    if not any(old.parent.iterdir()):
+                        old.parent.rmdir()
+                except OSError:
+                    pass
 
-            results.append({
-                "old_path": old_path_str,
-                "new_path": str(new_path),
-                "success": True
-            })
-
+            results.append({"old_path": old_str, "new_path": str(new_path), "success": True})
         except Exception as e:
-            results.append({"old_path": old_path_str, "success": False, "error": str(e)})
-
+            results.append({"old_path": old_str, "success": False, "error": str(e)})
     return results
 
 
-# =========================
-# PAGINATE
-# =========================
 def paginate(items, page, per_page=24):
-    total  = len(items)
-    pages  = max(1, (total + per_page - 1) // per_page)
-    page   = max(1, min(page, pages))
-    start  = (page - 1) * per_page
-    end    = start + per_page
+    total = len(items)
+    pages = max(1, (total + per_page - 1) // per_page)
+    page = max(1, min(page, pages))
+    start = (page - 1) * per_page
     return {
-        "items":    items[start:end],
-        "total":    total,
-        "page":     page,
-        "pages":    pages,
-        "per_page": per_page,
+        "items": items[start:start + per_page],
+        "total": total, "page": page, "pages": pages, "per_page": per_page,
     }
