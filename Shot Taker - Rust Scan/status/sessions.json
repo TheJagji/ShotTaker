@@ -1,0 +1,62 @@
+[
+  {
+    "id": "80b3dd47bec9",
+    "game": "gameoverlayui64.exe",
+    "platform": "steam",
+    "start": 1781135263.5230074,
+    "end": 1781141699.2367694,
+    "duration": 6436,
+    "shots": 16,
+    "timestamp": "2026-06-11 09:47"
+  },
+  {
+    "id": "9b397fab11bf",
+    "game": "PathOfExileSteam.exe",
+    "platform": "steam",
+    "start": 1781179804.9349957,
+    "end": 1781189089.0655851,
+    "duration": 9284,
+    "shots": 27,
+    "timestamp": "2026-06-11 22:10"
+  },
+  {
+    "id": "4a18e0e7d4fd",
+    "game": "PathOfExileSteam.exe",
+    "platform": "steam",
+    "start": 1781220785.3423426,
+    "end": 1781228566.4057329,
+    "duration": 7781,
+    "shots": 19,
+    "timestamp": "2026-06-12 09:33"
+  },
+  {
+    "id": "13b3e1ca156e",
+    "game": "grid.exe",
+    "platform": "steam",
+    "start": 1781266193.7459931,
+    "end": 1781268160.1428876,
+    "duration": 1966,
+    "shots": 4,
+    "timestamp": "2026-06-12 22:09"
+  },
+  {
+    "id": "9e27365d9bd7",
+    "game": "PathOfExileSteam.exe",
+    "platform": "steam",
+    "start": 1781310165.8703444,
+    "end": 1781310173.5148332,
+    "duration": 8,
+    "shots": 0,
+    "timestamp": "2026-06-13 10:22"
+  },
+  {
+    "id": "5d02dceb7153",
+    "game": "PathOfExileSteam.exe",
+    "platform": "steam",
+    "start": 1781315553.8175104,
+    "end": 1781322963.851805,
+    "duration": 7410,
+    "shots": 18,
+    "timestamp": "2026-06-13 11:52"
+  }
+]

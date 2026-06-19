@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ShotTaker</title>
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+<!-- ============================================================
+     ShotTaker icon set — line-style, echoing the focus-reticle
+     logo. Stroke uses currentColor so icons inherit the theme.
+     ============================================================ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="i-dash" fill="none" stroke="currentColor" stroke-width="2">
+      <rect x="3" y="3" width="7" height="7" rx="1.6"/><rect x="14" y="3" width="7" height="7" rx="1.6"/>
+      <rect x="3" y="14" width="7" height="7" rx="1.6"/><rect x="14" y="14" width="7" height="7" rx="1.6"/></g>
+    <g id="i-gallery" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
+      <rect x="3" y="4" width="18" height="14" rx="2"/><circle cx="8.5" cy="9" r="1.4"/><path d="M21 14l-5-4-8 7"/></g>
+    <g id="i-games" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8 8.5h8a4.6 4.6 0 0 1 4.5 3.7l.6 3.4a2 2 0 0 1-3.7 1.4L16 15H8l-1.4 2a2 2 0 0 1-3.7-1.4l.6-3.4A4.6 4.6 0 0 1 8 8.5z"/>
+      <path d="M6.7 12h2.4M7.9 10.8v2.4"/><circle cx="15.3" cy="11.6" r=".5"/><circle cx="17.3" cy="13.2" r=".5"/></g>
+    <g id="i-stats" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <path d="M5 20V11M12 20V5M19 20v-6"/></g>
+    <g id="i-settings" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <path d="M4 7h6M14 7h6M4 12h10M18 12h2M4 17h3M11 17h9"/>
+      <circle cx="12" cy="7" r="2.2" fill="var(--surface)"/><circle cx="16" cy="12" r="2.2" fill="var(--surface)"/>
+      <circle cx="9" cy="17" r="2.2" fill="var(--surface)"/></g>
+    <g id="i-capture" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <path d="M4 8.5V6a2 2 0 0 1 2-2h2.5M15.5 4H18a2 2 0 0 1 2 2v2.5M20 15.5V18a2 2 0 0 1-2 2h-2.5M8.5 20H6a2 2 0 0 1-2-2v-2.5"/>
+      <circle cx="12" cy="12" r="2.4" fill="currentColor" stroke="none"/></g>
+    <g id="i-burst" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+      <path d="M13 2.5L5.5 13H11l-1 8.5L18.5 11H13z" fill="currentColor"/></g>
+    <g id="i-pause" stroke="none" fill="currentColor">
+      <rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></g>
+    <g id="i-play" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
+      <path d="M7 5.5l11 6.5-11 6.5z" fill="currentColor"/></g>
+    <g id="i-star" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
+      <path d="M12 3.6l2.5 5.2 5.7.8-4.1 4 1 5.6L12 16.6 6.9 19.2l1-5.6-4.1-4 5.7-.8z"/></g>
+    <g id="i-star-fill" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round">
+      <path d="M12 3.6l2.5 5.2 5.7.8-4.1 4 1 5.6L12 16.6 6.9 19.2l1-5.6-4.1-4 5.7-.8z" fill="currentColor"/></g>
+    <g id="i-search" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <circle cx="11" cy="11" r="6.2"/><path d="M20 20l-4.2-4.2"/></g>
+    <g id="i-folder" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
+      <path d="M3 7.5a2 2 0 0 1 2-2h3.6l2 2H19a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></g>
+    <g id="i-close" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <path d="M6 6l12 12M18 6L6 18"/></g>
+    <g id="i-chev-l" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M15 5l-7 7 7 7"/></g>
+    <g id="i-chev-r" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9 5l7 7-7 7"/></g>
+    <g id="i-clock" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <circle cx="12" cy="12" r="8.2"/><path d="M12 7.5V12l3 2"/></g>
+    <g id="i-hybrid" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 7h4.5l9 10H21M3 17h4.5l2.2-2.4M14.5 9.2L16.5 7H21"/>
+      <path d="M18.5 4.6L21 7l-2.5 2.4M18.5 14.6L21 17l-2.5 2.4"/></g>
+    <g id="i-target" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.2"/></g>
+    <g id="i-bell" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6.5 9.5a5.5 5.5 0 0 1 11 0c0 4.5 2 5.5 2 5.5H4.5s2-1 2-5.5z"/><path d="M10 19a2 2 0 0 0 4 0"/></g>
+    <g id="i-trophy" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M7 4h10v4a5 5 0 0 1-10 0z"/><path d="M7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3M9.5 14h5M9 20h6M12 14v6"/></g>
+    <g id="i-floppy" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
+      <path d="M5 4h11l4 4v12H5z"/><path d="M8 4v5h7V4M8 20v-5h9v5"/></g>
+  </defs>
+</svg>
+
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="/static/icon.png" alt="ShotTaker" />
+      <div>
+        <div class="name" id="brandName">ShotTaker</div>
+        <div class="tag" id="brandTag">Every moment worth keeping.</div>
+      </div>
+    </div>
+    <nav class="nav" id="nav">
+      <button data-tab="dashboard" class="active"><span class="ico"><svg class="ic"><use href="#i-dash"/></svg></span> Dashboard</button>
+      <button data-tab="gallery"><span class="ico"><svg class="ic"><use href="#i-gallery"/></svg></span> Gallery</button>
+      <button data-tab="scanned"><span class="ico"><svg class="ic"><use href="#i-games"/></svg></span> Scanned Lists</button>
+      <button data-tab="stats"><span class="ico"><svg class="ic"><use href="#i-stats"/></svg></span> Stats</button>
+      <button data-tab="settings"><span class="ico"><svg class="ic"><use href="#i-settings"/></svg></span> Settings</button>
+    </nav>
+    <div class="spacer"></div>
+    <div class="side-foot">ShotTaker <span id="verFoot"></span><br>Local-first. No cloud, no kill-cam.</div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <header class="topbar">
+      <span class="status-dot" id="statusDot"></span>
+      <span class="title" id="pageTitle">Dashboard</span>
+      <span class="grow"></span>
+      <button class="btn sm" id="pauseBtn" onclick="togglePause()"><svg class="ic"><use href="#i-pause"/></svg> Pause</button>
+      <button class="btn sm" onclick="captureNow()"><svg class="ic"><use href="#i-capture"/></svg> Capture now</button>
+      <button class="btn sm" onclick="fireBurst()"><svg class="ic"><use href="#i-burst"/></svg> Burst</button>
+    </header>
+
+    <div class="content">
+      <!-- Dashboard -->
+      <section class="tabpage active" id="page-dashboard">
+        <div class="cards" id="dashCards"></div>
+        <div id="dashMiniStats" style="margin-top:18px"></div>
+      </section>
+
+      <!-- Gallery -->
+      <section class="tabpage" id="page-gallery">
+        <div class="gallery-toolbar">
+          <input type="search" id="gSearch" placeholder="Search the loot…" oninput="debouncedGallery()" style="min-width:180px" />
+          <select id="gGame" onchange="loadGallery()"><option value="">All games</option></select>
+          <select id="gType" onchange="loadGallery()">
+            <option value="">All types</option><option>TimeLapse</option><option>DynamicShot</option>
+            <option>Achievement</option><option>Manual</option><option>Imported</option>
+          </select>
+          <select id="gSort" onchange="loadGallery()">
+            <option value="newest">Newest</option><option value="oldest">Oldest</option>
+            <option value="rating">Top rated</option><option value="largest">Largest</option>
+          </select>
+          <button class="btn sm" id="favFilter" onclick="toggleFavFilter()"><svg class="ic"><use href="#i-star"/></svg> Favorites</button>
+          <span class="grow"></span>
+          <button class="btn sm" onclick="loadSessionView()">Last run</button>
+          <button class="btn sm" id="selBtn" onclick="toggleSelectMode()">Select</button>
+        </div>
+        <div class="row" id="bulkBar" style="margin-bottom:14px; display:none">
+          <span id="selCount" class="muted">0 selected</span>
+          <span class="grow"></span>
+          <button class="btn sm" onclick="bulkExport('zip')">Export ZIP</button>
+          <button class="btn sm" onclick="bulkExport('contactsheet')">Contact sheet</button>
+          <button class="btn sm" onclick="bulkExport('gif')">GIF</button>
+          <button class="btn sm" onclick="openRename()">Rename</button>
+          <button class="btn sm danger" onclick="bulkDelete()">Delete</button>
+        </div>
+        <div class="grid" id="galleryGrid"></div>
+        <div class="pagination" id="galleryPager"></div>
+      </section>
+
+      <!-- Scanned Lists -->
+      <section class="tabpage" id="page-scanned">
+        <div class="row" style="margin-bottom:16px;gap:6px" id="scannedTabs">
+          <button class="btn sm primary" id="scannedTabGames" onclick="switchScannedTab('games')">Games List</button>
+          <button class="btn sm" id="scannedTabBlacklist" onclick="switchScannedTab('blacklist')">Blacklist</button>
+        </div>
+        <div id="scannedBody"></div>
+      </section>
+
+      <!-- Stats -->
+      <section class="tabpage" id="page-stats">
+        <div class="cards" id="statCards"></div>
+        <div class="panel" style="margin-top:18px">
+          <h3>Captures — last 30 days</h3><div class="sub">Your highlight reel, day by day</div>
+          <div class="spark" id="sparkline"></div>
+        </div>
+        <div class="row" style="align-items:flex-start; gap:18px">
+          <div class="panel grow"><h3>Top games by shots</h3><div id="shotsByGame"></div></div>
+          <div class="panel grow"><h3>Hours sunk per game</h3><div id="playtimeByGame"></div></div>
+        </div>
+        <div class="row" style="align-items:flex-start; gap:18px">
+          <div class="panel grow"><h3>Shot types</h3><div id="shotsByType"></div></div>
+          <div class="panel grow"><h3>Sessions per game</h3><div id="sessionsByGame"></div></div>
+        </div>
+        <div class="panel"><h3>Recent runs</h3><div id="recentSessions"></div></div>
+        <div class="panel"><h3>Highlight log</h3><div id="eventLog"></div></div>
+      </section>
+
+      <!-- Settings -->
+      <section class="tabpage" id="page-settings">
+        <div class="row" style="margin-bottom:12px;gap:6px" id="settingsGroups"></div>
+        <div class="row" style="margin-bottom:16px;gap:6px" id="settingsTabs"></div>
+        <div id="settingsBody"></div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<!-- Context menu -->
+<div id="ctxMenu" style="display:none;position:fixed;z-index:400;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow);min-width:180px;padding:6px 0"></div>
+
+<!-- Cloud upload modal -->
+<div class="overlay" id="cloudOverlay">
+  <div class="modal" style="max-width:520px">
+    <h2>Send to cloud folder</h2>
+    <p class="sub" id="cloudModalSub">Select screenshots to copy to your cloud folder.</p>
+    <div id="cloudPickerGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;max-height:320px;overflow-y:auto;margin-bottom:16px"></div>
+    <div class="row between">
+      <button class="btn ghost" onclick="closeModal('cloudOverlay')">Cancel</button>
+      <button class="btn primary" onclick="doCloudCopy()">Copy selected</button>
+    </div>
+  </div>
+</div>
+
+<!-- Feedback page (inside main content) -->
+<div id="feedbackPageHolder" style="display:none"></div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox">
+  <div class="lb-top">
+    <button class="btn sm" onclick="closeLightbox()"><svg class="ic"><use href="#i-close"/></svg> Close</button>
+    <span class="grow"></span>
+    <div class="stars" id="lbStars"></div>
+    <button class="btn sm" id="lbFav" onclick="lbFavorite()"><svg class="ic"><use href="#i-star"/></svg> Favorite</button>
+    <button class="btn sm" onclick="lbTag()">Tags</button>
+    <button class="btn sm" onclick="lbOpen()">Open</button>
+    <button class="btn sm danger" onclick="lbDelete()">Delete</button>
+  </div>
+  <div class="lb-img"><img id="lbImg" src="" /></div>
+  <button class="nav-arrow left" onclick="lbNav(-1)"><svg class="ic"><use href="#i-chev-l"/></svg></button>
+  <button class="nav-arrow right" onclick="lbNav(1)"><svg class="ic"><use href="#i-chev-r"/></svg></button>
+</div>
+
+<!-- Setup wizard -->
+<div class="overlay" id="setupOverlay">
+  <div class="modal">
+    <div class="row" style="gap:14px; margin-bottom:6px">
+      <img src="/static/icon.png" style="width:44px;height:44px;border-radius:11px" alt="" />
+      <div><h2 style="margin:0">Player one, ready?</h2>
+      <div class="muted" style="font-size:13px">Let's get ShotTaker on your team.</div></div>
+    </div>
+    <p class="sub">Point it at your games and it grabs the moments worth keeping — loading
+       screens and AFK menus left on the cutting-room floor. Takes about a minute.</p>
+
+    <div class="section-title">1 · Where do you keep your games?</div>
+    <div class="platform-grid" id="setupPlatforms"></div>
+    <button class="btn sm" onclick="setupAutodetect()" style="margin-top:8px"><svg class="ic"><use href="#i-search"/></svg> Scan my drives</button>
+    <div class="hint" id="setupDetectResult" style="margin-top:8px"></div>
+
+    <div class="section-title">2 · Capture engine</div>
+    <p style="color:var(--muted);font-size:12.5px;margin-bottom:10px">
+      The Rust edition uses Windows DXGI for GPU-accelerated capture — lower CPU, faster grabs.
+      The standard edition uses pure Python and works anywhere. You can switch later in Settings → Advanced.
+    </p>
+    <div class="mode-grid" style="grid-template-columns:repeat(2,1fr)" id="setupEngine"></div>
+
+    <div class="section-title">3 · How should it capture?</div>
+    <div class="mode-grid" id="setupModes"></div>
+
+    <div class="section-title">4 · Where do the shots land?</div>
+    <div class="row">
+      <input type="text" id="setupFolder" placeholder="(default folder, right next to the app)" style="flex:1" />
+      <button class="btn sm" onclick="browseInto('setupFolder')"><svg class="ic"><use href="#i-folder"/></svg> Browse</button>
+    </div>
+
+    <div class="row between" style="margin-top:24px">
+      <span class="hint">Change any of this later in Settings → Advanced.</span>
+      <button class="btn primary" onclick="finishSetup()">Insert coin →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Rename modal -->
+<div class="overlay" id="renameOverlay">
+  <div class="modal" style="max-width:460px">
+    <h2>Rename shots</h2>
+    <p class="sub">File these into the ShotTaker naming convention.</p>
+    <div class="field"><label>Game name</label><input type="text" id="renameGame" /></div>
+    <div class="field"><label>Type</label>
+      <select id="renameType"><option>Imported</option><option>TimeLapse</option>
+        <option>DynamicShot</option><option>Achievement</option><option>Manual</option></select></div>
+    <div class="row between"><button class="btn ghost" onclick="closeModal('renameOverlay')">Cancel</button>
+      <button class="btn primary" onclick="doRename()">Rename</button></div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toasts"></div>
+<script src="/static/app.js"></script>
+</body>
+</html>
